@@ -2,6 +2,7 @@ const http=require("http");
 const express =require("express");
 const cors = require("cors");
 const socketIO = require("socket.io");
+const path = require("path");
 
 
 const app=express();
@@ -17,18 +18,22 @@ const server=http.createServer(app);
 const io=socketIO(server);
 
 
-app.use(express.static(path.join(__dirname, "./chat/build")));
 
-app.get("*", function (_, res) {
-  res.sendFile(
-    path.join(__dirname, "./chat/build/index.html"),
-    function (err) {
-      if (err) {
-        res.status(500).send(err);
-      }
-    }
-  );
-});
+
+if ( process.env.NODE_ENV == "production"){
+
+  app.use(express.static("chat/build"));
+
+  const path = require("path");
+
+  app.get("*", (req, res) => {
+
+      res.sendFile(path.resolve(__dirname, 'chat', 'build', 'index.html'));
+
+  })
+
+
+}
 
 io.on("connection",(socket)=>{
     console.log("New Connection");
